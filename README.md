@@ -23,7 +23,6 @@ All the programs in this repository are licensed under the MIT License. You can 
 
 ## MY SOCIAL PROFILES:
 ### [LINKEDIN](https://www.linkedin.com/in/jayashre-%E2%80%8E-932002251/)
-### [INSTAGRAM](https://www.instagram.com/frmj17y/)
 
 
 
