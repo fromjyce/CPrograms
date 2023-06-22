@@ -12,13 +12,19 @@ The cycle length is 16 when n is 22.
 Another example:
 n = 13
 Sequence is: 13 40 20 10 5 16 8 4 2 1
-Cycle length : 10*/
+Cycle length : 10
+Write a C program to print the sequence and also calculate the cycle length for any given 
+positive integer value for n > 0. If we enter a negative value or zero, then the program 
+should terminate with an appropriate message printing that the number entered should 
+be positive.*/
 #include <stdio.h>
 
 int calculateCycleLength(int n) {
     int cycleLength = 1;
 
     while (n != 1) {
+        printf("%d ", n);
+
         if (n % 2 == 0) {
             n = n / 2;
         } else {
@@ -27,13 +33,20 @@ int calculateCycleLength(int n) {
         cycleLength++;
     }
 
+    printf("%d\n", n); // Print the last number (1) of the sequence
+
     return cycleLength;
 }
 
 int main() {
     int n;
-    printf("Enter a number: ");
+    printf("Enter a positive integer: ");
     scanf("%d", &n);
+
+    if (n <= 0) {
+        printf("Number entered should be positive.\n");
+        return 0;
+    }
 
     int cycleLength = calculateCycleLength(n);
     printf("Cycle length for %d is %d\n", n, cycleLength);
