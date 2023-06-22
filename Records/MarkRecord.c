@@ -132,4 +132,12 @@ int main() {
     printf("\nEnter the student index to print the mark sheet (1-%d): ", N);
     scanf("%d", &studentIndex);
 
-    if (studentIndex >= 1 && studentIndex
+    if (studentIndex >= 1 && studentIndex <= N) {
+        printf("\nMark Sheet:\n");
+        printMarkSheet(students[studentIndex - 1]);
+    } else {
+        printf("\nInvalid student index!\n");
+    }
+
+    return 0;
+}
