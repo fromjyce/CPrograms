@@ -1,5 +1,5 @@
-# C Programs for FIRST Semester
-This repository contains the C programs that I have submitted for assignments and records during my first semester at college. The programs cover a range of topics, including basic data types, control structures, arrays, functions, and file handling.
+# C Programs
+This repository contains the C programs that I have submitted for assignments and records during my first semester at college. The programs cover a range of topics, including basic data types, control structures, arrays, functions, and file handling. Additionally, I have uploaded C files that I have created so far, showcasing my programming journey.
 
 ## Structure of the Repository
 The repository contains separate folders for assignments and records from my first semester. These folders store multiple C programs and other related files.
