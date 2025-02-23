@@ -1,83 +1,54 @@
 #include <stdio.h>
-#include <ctype.h>
 #include <string.h>
 
-#define MAX_STATES 10
-#define MAX_CHARS 128
-
-typedef enum {
-    TOKEN_IDENTIFIER,
-    TOKEN_NUMBER,
-    TOKEN_OPERATOR,
-    TOKEN_INVALID
-} TokenType;
-
-int transition_table[MAX_STATES][MAX_CHARS];
-
-void initialize_table() {
-    memset(transition_table, -1, sizeof(transition_table));
-    
-    for (int i = 'a'; i <= 'z'; i++) transition_table[0][i] = 1; // Identifiers
-    for (int i = 'A'; i <= 'Z'; i++) transition_table[0][i] = 1;
-    transition_table[0]['_'] = 1;
-    for (int i = '0'; i <= '9'; i++) transition_table[0][i] = 2; // Numbers
-    transition_table[0]['+'] = transition_table[0]['-'] = transition_table[0]['*'] = transition_table[0]['/'] = 3; // Operators
-    
-    for (int i = 'a'; i <= 'z'; i++) transition_table[1][i] = 1;
-    for (int i = 'A'; i <= 'Z'; i++) transition_table[1][i] = 1;
-    for (int i = '0'; i <= '9'; i++) transition_table[1][i] = 1;
-    transition_table[1]['_'] = 1;
-    
-    
-    for (int i = '0'; i <= '9'; i++) transition_table[2][i] = 2;
-}
-
-TokenType get_token_type(const char *token) {
-    if (isalpha(token[0]) || token[0] == '_') return TOKEN_IDENTIFIER;
-    if (isdigit(token[0])) return TOKEN_NUMBER;
-    if (strchr("+-*/", token[0]) != NULL) return TOKEN_OPERATOR;
-    return TOKEN_INVALID;
-}
-
-void tokenize(const char *input) {
+int simulateDFA(const char *input) {
     int state = 0;
-    char token[256];
-    int token_index = 0;
+    int length = strlen(input);
 
-    printf("\nTokenizing: %s\n", input);
-
-    for (int i = 0; input[i] != '\0'; i++) {
+    for (int i = 0; i < length; i++) {
         char c = input[i];
-        int next_state = transition_table[state][(int)c];
 
-        if (next_state != -1) {
-            token[token_index++] = c;
-            state = next_state;
-        } else {
-            token[token_index] = '\0';
-            if (token_index > 0) {
-                TokenType type = get_token_type(token);
-                printf("Token: %-10s Type: %d\n", token, type);
-            }
-            token_index = 0;
-            state = 0;
-            i--;
+        switch (state) {
+            case 0:
+                if (c == 'a') state = 1;
+                else if (c == 'b') state = 0;
+                else return 0;
+                break;
+
+            case 1:
+                if (c == 'a') state = 1;
+                else if (c == 'b') state = 2;
+                else return 0;
+                break;
+
+            case 2:
+                if (c == 'a' || c == 'b') state = 2;
+                else return 0;
+                break;
+
+            default:
+                return 0;
         }
     }
 
-    if (token_index > 0) {
-        token[token_index] = '\0';
-        TokenType type = get_token_type(token);
-        printf("Token: %-10s Type: %d\n", token, type);
-    }
+    return (state == 2);
 }
+
 int main() {
-    initialize_table();
-    
-    char input[256];
-    printf("Enter input string: ");
-    fgets(input, sizeof(input), stdin);
-    input[strcspn(input, "\n")] = 0; 
-    tokenize(input);
+    char input[100];
+
+    while (1) {
+        printf("\nEnter a string (a, b) or type 'exit' to quit: ");
+        scanf("%s", input);
+
+        if (strcmp(input, "exit") == 0) break;
+
+        if (simulateDFA(input)) {
+            printf("Accepted\n");
+        } else {
+            printf("Rejected\n");
+        }
+    }
+
     return 0;
 }
