@@ -10,6 +10,12 @@
 #define MAX_NONTERMINALS 20
 #define MAX_INPUT_LENGTH 100
 
+// Rule 1: E -> TQ
+// Rule 2: Q -> +TQ | -TQ | ε
+// Rule 3: T -> FR
+// Rule 4: R -> *FR | /FR | ε
+// Rule 5: F -> (E) | i
+
 typedef struct {
     char lhs;
     char rhs[MAX_SYMBOLS][MAX_SYMBOLS];
@@ -53,8 +59,6 @@ bool isNonTerminal(char c);
 void printStack();
 void printRemainingInput(char *input, int ptr);
 char* findProduction(char non_term, char term);
-bool isInFirst(char non_term, char term);
-bool isInFollow(char non_term, char term);
 
 int main() {
     printf("LL(1) Parser with User-Defined Grammar\n");
@@ -95,38 +99,31 @@ void getGrammarFromUser() {
     while (1) {
         printf("Rule %d: ", num_rules + 1);
         fgets(line, sizeof(line), stdin);
-        
-        // Remove newline character
+
         line[strcspn(line, "\n")] = '\0';
-        
-        // Stop if empty line
+
         if (strlen(line) == 0) {
             break;
         }
         
-        // Parse the production rule
         char *arrow = strstr(line, "->");
         if (arrow == NULL) {
             printf("Invalid format. Use '->' to separate LHS and RHS.\n");
             continue;
         }
-        
-        // Extract LHS (must be a single non-terminal)
+
         grammar[num_rules].lhs = line[0];
         
-        // Extract RHS productions
         char *rhs_part = arrow + 2;
         char *production = strtok(rhs_part, "|");
         grammar[num_rules].num_productions = 0;
         
         while (production != NULL && grammar[num_rules].num_productions < MAX_SYMBOLS) {
-            // Trim whitespace
             while (*production == ' ') production++;
             char *end = production + strlen(production) - 1;
             while (end > production && *end == ' ') end--;
             *(end + 1) = '\0';
             
-            // Handle epsilon (ε or empty)
             if (strcmp(production, "ε") == 0 || strlen(production) == 0) {
                 strcpy(grammar[num_rules].rhs[grammar[num_rules].num_productions], "");
             } else {
@@ -146,7 +143,7 @@ void getGrammarFromUser() {
 }
 
 void identifySymbols() {
-    // First identify all non-terminals (LHS of rules)
+    //  identify all non-terminals
     for (int i = 0; i < num_rules; i++) {
         bool found = false;
         for (int j = 0; j < num_non_terminals; j++) {
@@ -160,14 +157,12 @@ void identifySymbols() {
         }
     }
     
-    // Then identify terminals (symbols not in non_terminals and not ε)
+    // identify terminals
     for (int i = 0; i < num_rules; i++) {
         for (int j = 0; j < grammar[i].num_productions; j++) {
             for (int k = 0; k < strlen(grammar[i].rhs[j]); k++) {
                 char c = grammar[i].rhs[j][k];
                 if (c == '\0') continue;
-                
-                // Check if it's not a non-terminal and not already in terminals
                 bool is_non_terminal = false;
                 for (int l = 0; l < num_non_terminals; l++) {
                     if (non_terminals[l] == c) {
@@ -192,7 +187,6 @@ void identifySymbols() {
         }
     }
     
-    // Add end marker
     bool has_dollar = false;
     for (int i = 0; i < num_terminals; i++) {
         if (terminals[i] == '$') {
@@ -223,11 +217,10 @@ void printGrammar() {
 }
 
 void addToTable(char non_term, char term, char *prod) {
-    // Check if entry already exists
     for (int i = 0; i < num_table_entries; i++) {
         if (parsing_table[i].non_terminal == non_term && 
             parsing_table[i].terminal == term) {
-            return; // Avoid duplicates
+            return;
         }
     }
     
@@ -238,7 +231,6 @@ void addToTable(char non_term, char term, char *prod) {
 }
 
 void createParsingTable() {
-    // For each production A -> α
     for (int i = 0; i < num_rules; i++) {
         char A = grammar[i].lhs;
         
@@ -275,7 +267,6 @@ void createParsingTable() {
         }
     }
     
-    // Special cases for operators
     addToTable('Q', '+', "+TQ");
     addToTable('Q', '-', "-TQ");
     addToTable('R', '*', "*FR");
@@ -299,7 +290,6 @@ void printParsingTable() {
 }
 
 void parseInput(char *input) {
-    // Initialize stack with $ and start symbol (first non-terminal)
     push('$');
     push(non_terminals[0]);
     
