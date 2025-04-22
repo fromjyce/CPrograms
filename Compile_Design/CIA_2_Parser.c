@@ -10,12 +10,6 @@
 #define MAX_NONTERMINALS 20
 #define MAX_INPUT_LENGTH 100
 
-// Rule 1: E -> TQ
-// Rule 2: Q -> +TQ | -TQ | ε
-// Rule 3: T -> FR
-// Rule 4: R -> *FR | /FR | ε
-// Rule 5: F -> (E) | i
-
 typedef struct {
     char lhs;
     char rhs[MAX_SYMBOLS][MAX_SYMBOLS];
