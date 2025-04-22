@@ -3,66 +3,59 @@
 #include <string.h>
 #include <stdbool.h>
 
-/* ========== CONSTANTS AND MACROS ========== */
-#define MAX_RULES 10          // Maximum number of grammar rules
-#define MAX_SYMBOLS 10        // Maximum symbols in a production
-#define MAX_TERMINALS 10      // Maximum terminal symbols
-#define MAX_NONTERMINALS 10   // Maximum non-terminal symbols
+// E → TQ  
+// Q → +TQ | -TQ | ε  
+// T → FR  
+// R → *FR | /FR | ε  
+// F → (E) | i
 
-/* ========== DATA STRUCTURES ========== */
-
-// Structure to represent a grammar rule
+#define MAX_RULES 10          // MAX grammar rules
+#define MAX_SYMBOLS 10        // MAX symbols
+#define MAX_TERMINALS 10      // MAX terminals
+#define MAX_NONTERMINALS 10   // MAX non-terminals
 typedef struct {
-    char lhs;                   // Left-hand side (non-terminal)
-    char rhs[MAX_SYMBOLS][MAX_SYMBOLS];  // Right-hand side productions
-    int num_productions;        // Number of productions for this non-terminal
+    char lhs;                   // LHS - NON TERMINAL
+    char rhs[MAX_SYMBOLS][MAX_SYMBOLS];  // RHS
+    int num_productions;        // No of productions
 } Rule;
 
-// Structure for parsing table entries
 typedef struct {
     char non_terminal;          // Non-terminal symbol
     char terminal;              // Terminal symbol
     char production[MAX_SYMBOLS]; // Production to apply
 } TableEntry;
 
-/* ========== GLOBAL VARIABLES ========== */
-Rule grammar[MAX_RULES];        // Array to store grammar rules
-int num_rules = 0;             // Current number of rules
+Rule grammar[MAX_RULES];        // Grammar arrays rules
+int num_rules = 0;             // curr rules
 
-// Terminal symbols in the grammar
 char terminals[MAX_TERMINALS] = {'i', '+', '-', '*', '/', '(', ')', '$'};
-int num_terminals = 8;         // Number of terminals
+int num_terminals = 8;         // No of terminals
 
-// Non-terminal symbols in the grammar
 char non_terminals[MAX_NONTERMINALS] = {'E', 'T', 'F'};
-int num_non_terminals = 3;     // Number of non-terminals
+int num_non_terminals = 3;     // No of non-terminals
 
 TableEntry parsing_table[MAX_NONTERMINALS * MAX_TERMINALS]; // Parsing table
-int num_table_entries = 0;     // Number of entries in parsing table
+int num_table_entries = 0;     // No. of entries in parsing table
 
-// Stack for predictive parsing
 char stack[100];               // Stack array
 int top = -1;                  // Stack top pointer
 
-/* ========== FUNCTION PROTOTYPES ========== */
-void initializeGrammar();       // Initialize grammar rules
-void printGrammar();           // Print grammar rules
-void addToTable(char non_term, char term, char *prod); // Add entry to parsing table
-void createParsingTable();      // Build the LL(1) parsing table
-void printParsingTable();       // Display parsing table
-void parseInput(char *input);   // Parse input string
-void push(char c);              // Push to stack
-char pop();                     // Pop from stack
-char stackTop();                // Get top of stack
-bool isTerminal(char c);        // Check if symbol is terminal
-bool isNonTerminal(char c);     // Check if symbol is non-terminal
-void printStack();              // Print stack contents
-void printRemainingInput(char *input, int ptr); // Print remaining input
-char* findProduction(char non_term, char term); // Find production in parsing table
+void initializeGrammar();
+void printGrammar();
+void addToTable(char non_term, char term, char *prod);
+void createParsingTable();
+void printParsingTable();
+void parseInput(char *input);
+void push(char c);
+char pop();
+char stackTop();
+bool isTerminal(char c);
+bool isNonTerminal(char c);
+void printStack();
+void printRemainingInput(char *input, int ptr);
+char* findProduction(char non_term, char term);
 
-/* ========== MAIN FUNCTION ========== */
 int main() {
-    // Initialize the grammar with production rules
     initializeGrammar();
     printf("Grammar Rules:\n");
     printGrammar();
@@ -83,8 +76,6 @@ int main() {
     return 0;
 }
 
-/* ========== GRAMMAR INITIALIZATION ========== */
-// Initialize grammar with arithmetic expression rules
 void initializeGrammar() {
     // Rule 1: E -> TQ (where Q represents E')
     grammar[0].lhs = 'E';
@@ -127,14 +118,13 @@ void printGrammar() {
         for (int j = 0; j < grammar[i].num_productions; j++) {
             printf("%s", grammar[i].rhs[j]);
             if (j != grammar[i].num_productions - 1) {
-                printf(" | ");  // Separate productions with pipe
+                printf(" | ");
             }
         }
         printf("\n");
     }
 }
 
-/* ========== PARSING TABLE CONSTRUCTION ========== */
 // Add an entry to the parsing table
 void addToTable(char non_term, char term, char *prod) {
     parsing_table[num_table_entries].non_terminal = non_term;
@@ -145,21 +135,21 @@ void addToTable(char non_term, char term, char *prod) {
 
 // Create the LL(1) parsing table
 void createParsingTable() {
-    // Productions for E -> TQ
+    // for E -> TQ
     addToTable('E', 'i', "TQ");   // E can start with 'i'
     addToTable('E', '(', "TQ");   // E can start with '('
     
-    // Productions for Q -> +TQ | -TQ | ε
+    // for Q -> +TQ | -TQ | ε
     addToTable('Q', '+', "+TQ");  // On '+', choose +TQ
     addToTable('Q', '-', "-TQ");  // On '-', choose -TQ
     addToTable('Q', ')', "");     // On ')', choose ε (empty)
     addToTable('Q', '$', "");     // On '$', choose ε (empty)
     
-    // Productions for T -> FR
+    // for T -> FR
     addToTable('T', 'i', "FR");   // T can start with 'i'
     addToTable('T', '(', "FR");   // T can start with '('
     
-    // Productions for R -> *FR | /FR | ε
+    // for R -> *FR | /FR | ε
     addToTable('R', '*', "*FR");  // On '*', choose *FR
     addToTable('R', '/', "/FR");  // On '/', choose /FR
     addToTable('R', '+', "");     // On '+', choose ε
@@ -167,13 +157,11 @@ void createParsingTable() {
     addToTable('R', ')', "");     // On ')', choose ε
     addToTable('R', '$', "");     // On '$', choose ε
     
-    // Productions for F -> (E) | i
+    // for F -> (E) | i
     addToTable('F', '(', "(E)");  // On '(', choose (E)
     addToTable('F', 'i', "i");    // On 'i', choose i
 }
 
-/* ========== PARSING TABLE DISPLAY ========== */
-// Print the parsing table
 void printParsingTable() {
     printf("Non-terminal\tTerminal\tProduction\n");
     printf("--------------------------------------------\n");
@@ -185,7 +173,6 @@ void printParsingTable() {
     }
 }
 
-/* ========== PREDICTIVE PARSING ========== */
 // Parse input string using LL(1) parsing table
 void parseInput(char *input) {
     // Initialize stack with $ and start symbol E
@@ -249,12 +236,10 @@ void parseInput(char *input) {
         exit(1);
     }
     
-    // Successful parse
     printf("$\t\t$\t\tAccept\n");
     printf("\nInput successfully parsed!\n");
 }
 
-/* ========== PARSING TABLE LOOKUP ========== */
 // Find production for given non-terminal and terminal
 char* findProduction(char non_term, char term) {
     for (int i = 0; i < num_table_entries; i++) {
@@ -266,27 +251,24 @@ char* findProduction(char non_term, char term) {
     return NULL;  // No production found
 }
 
-/* ========== STACK OPERATIONS ========== */
-// Push symbol onto stack
+// Push into stack
 void push(char c) {
-    if (c == '\0') return;  // Don't push empty string
+    if (c == '\0') return; 
     stack[++top] = c;
 }
 
-// Pop symbol from stack
+// Pop from stack
 char pop() {
-    if (top == -1) return '\0';  // Stack underflow
+    if (top == -1) return '\0';
     return stack[top--];
 }
 
-// Get top of stack without popping
+// Get top of stack
 char stackTop() {
-    if (top == -1) return '\0';  // Empty stack
+    if (top == -1) return '\0';
     return stack[top];
 }
 
-/* ========== HELPER FUNCTIONS ========== */
-// Check if symbol is a terminal
 bool isTerminal(char c) {
     for (int i = 0; i < num_terminals; i++) {
         if (terminals[i] == c) return true;
@@ -294,7 +276,6 @@ bool isTerminal(char c) {
     return false;
 }
 
-// Check if symbol is a non-terminal
 bool isNonTerminal(char c) {
     for (int i = 0; i < num_non_terminals; i++) {
         if (non_terminals[i] == c) return true;
@@ -302,14 +283,12 @@ bool isNonTerminal(char c) {
     return false;
 }
 
-// Print current stack contents
 void printStack() {
     for (int i = 0; i <= top; i++) {
         printf("%c", stack[i]);
     }
 }
 
-// Print remaining input string
 void printRemainingInput(char *input, int ptr) {
     for (int i = ptr; input[i] != '\0'; i++) {
         printf("%c", input[i]);
